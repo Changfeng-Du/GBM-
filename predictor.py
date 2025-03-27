@@ -9,12 +9,12 @@ from pypmml import Model
 # Load the PMML model
 pmml_model = Model.load('gbm_model.pmml')
 # Load the test data to create LIME explainer
-dev = pd.read_csv('dev.csv')
+dev = pd.read_csv('dev_finally.csv')
 # 划分特征变量X（去除'target'列）
 X_train = dev.drop(['target'], axis=1)
 # 提取目标变量y（'target'列）
 y_train = dev['target']
-vad = pd.read_csv('vad.csv')
+vad = pd.read_csv('vad_finally.csv')
 # 划分特征变量X（去除'target'列）
 X_test = vad.drop(['target'], axis=1)
 # 提取目标变量y（'target'列）
