@@ -7,12 +7,23 @@ from lime.lime_tabular import LimeTabularExplainer
 from pypmml import Model
 
 # Load the PMML model
-model = Model.load('gbm_model.pmml')
-
+pmml_model = Model.load('gbm_model.pmml')
 # Load the test data to create LIME explainer
-dev = pd.read_csv('dev_finally.csv')
-X_test = dev.drop(['target'], axis=1)
-
+dev = pd.read_csv('dev.csv')
+# 划分特征变量X（去除'target'列）
+X_train = dev.drop(['target'], axis=1)
+# 提取目标变量y（'target'列）
+y_train = dev['target']
+vad = pd.read_csv('vad.csv')
+# 划分特征变量X（去除'target'列）
+X_test = vad.drop(['target'], axis=1)
+# 提取目标变量y（'target'列）
+y_test = vad['target']
+input_data = pd.DataFrame(vad)
+predictions = pmml_model.predict(input_data)
+print(predictions.head()) 
+predicted_values0 = predictions['probability(0)']  # 根据你的模型输出，调整目标列名
+predicted_values1 = predictions['probability(1)'] 
 # Define feature names in the correct order (from PMML model)
 feature_names = ['smoker', 'carace', 'Hypertension', 'HHR', 'RIDAGEYR', 
                  'INDFMPIR', 'LBXWBCSI', 'BMXBMI', 'drink']
@@ -53,7 +64,7 @@ if st.button("Predict"):
     input_df = pd.DataFrame([feature_values], columns=feature_names)
     
     # Make prediction
-    prediction = model.predict(input_df)
+    prediction = pmml_model.predict(input_df)
     prob_0 = prediction['probability(0)'][0]
     prob_1 = prediction['probability(1)'][0]
     
@@ -82,37 +93,50 @@ if st.button("Predict"):
 
     # SHAP Explanation
     st.subheader("SHAP Explanation")
-    
-    # Define prediction function for SHAP
+    # 2. 获取模型特征
+    model_features = pmml_model.inputNames
+
+    # 3. 定义预测函数
     def pmml_predict(data):
         if isinstance(data, pd.DataFrame):
-            input_df = data[feature_names].copy()
+            input_df = data[model_features].copy()
         else:
-            input_df = pd.DataFrame(data, columns=feature_names)
-        predictions = model.predict(input_df)
-        return np.column_stack((predictions['probability(0)'], predictions['probability(1)']))
+            input_df = pd.DataFrame(data, columns=model_features)
     
-    # Create SHAP explainer
-    background = X_test[feature_names].iloc[:100]
+        predictions = pmml_model.predict(input_df)
+        return np.column_stack((
+            predictions['probability(0)'],
+            predictions['probability(1)']
+        ))
+
+    # 4. 准备数据（严格使用前100样本）
+    background = vad[model_features].iloc[:100]  # vad前100样本作为背景
+    dev_samples = dev[model_features].iloc[:100]  # dev前100样本计算SHAP值
+    
+    # 5. 创建解释器
     explainer = shap.KernelExplainer(pmml_predict, background)
     
-    # Calculate SHAP values
-    shap_values = explainer.shap_values(input_df, nsamples=100)
+    # 6. 计算SHAP值（直接获得两个类别的SHAP值）
+    shap_values = explainer.shap_values(
+        dev_samples,
+        nsamples=100,
+        l1_reg="num_features(10)"
+    )
     
     # Display force plot
     plt.figure()
     if predicted_class == 1:
-        shap.force_plot(explainer.expected_value, shap_values[1][0,:], input_df.iloc[0], matplotlib=True)
+        shap.force_plot(explainer.expected_value[1], shap_values[:,:,1], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
     else:
-        shap.force_plot(1-explainer.expected_value, shap_values[0][0,:], input_df.iloc[0], matplotlib=True)
+        shap.force_plot(explainer.expected_value[0], shap_values[:,:,0], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
     st.pyplot(plt.gcf())
     plt.clf()
 
     # LIME Explanation
     st.subheader("LIME Explanation")
     lime_explainer = LimeTabularExplainer(
-        training_data=X_test[feature_names].values,
-        feature_names=feature_names,
+        training_data=dev_samples.values,
+        feature_names=model_features,
         class_names=['Non-comorbidity', 'Comorbidity'],
         mode='classification'
     )
