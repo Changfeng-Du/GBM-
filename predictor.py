@@ -9,8 +9,8 @@ from pypmml import Model
 # Load the PMML model
 pmml_model = Model.load('gbm_model.pmml')
 # Load the data
-dev = pd.read_csv('dev.csv')
-vad = pd.read_csv('vad.csv')
+dev = pd.read_csv('dev_finally.csv')
+vad = pd.read_csv('vad_finally.csv')
 
 # Define feature names in the correct order (from PMML model)
 feature_names = ['smoker', 'carace', 'Hypertension', 'HHR', 'RIDAGEYR', 
