@@ -92,7 +92,7 @@ if st.button("Predict"):
     st.write(advice)
 
     # SHAP Explanation
-     st.subheader("SHAP Force Plot Explanation")
+    st.subheader("SHAP Force Plot Explanation")
     explainer = shap.TreeExplainer(pmml_model)
 
     shap_values_class1 =explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))
