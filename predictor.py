@@ -5,7 +5,14 @@ import shap
 import matplotlib.pyplot as plt
 from lime.lime_tabular import LimeTabularExplainer
 from pypmml import Model
+import toml
+from pypmml.base import PMMLContext
+# 读取TOML配置
+config = toml.load("config.toml")
+java_path = config["java_path"]
 
+# 将java_path传递给需要使用Java的库
+PMMLContext.getOrCreate(java_path=java_path)
 # Load the PMML model
 model = Model.load('gbm_model.pmml')
 
