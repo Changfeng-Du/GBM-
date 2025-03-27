@@ -54,7 +54,7 @@ if st.button("Predict"):
     # Make prediction
     prediction = pmml_model.predict(input_df)
     prob_0 = prediction['probability(1)'][0]
-    prob_1 = prediction['probability(0)'][0]
+    prob_1 = prediction['probability(0)'][1]
     
     # Determine predicted class
     predicted_class = 1 if prob_1 > 0.560066899148278 else 0
