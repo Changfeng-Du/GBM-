@@ -83,7 +83,7 @@ if st.button("Predict"):
     st.subheader("SHAP Explanation")
     
     # 准备背景数据（使用前100个样本）
-    background = vad[feature_names].iloc[:500]
+    background = vad[feature_names].iloc[:100]
     
     # 定义预测函数
     def pmml_predict(data):
