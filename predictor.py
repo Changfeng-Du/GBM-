@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from lime.lime_tabular import LimeTabularExplainer
 from pypmml import Model
 import toml
-
+from pypmml.base import PMMLContext
 # 读取TOML配置
 config = toml.load("config.toml")
 java_path = config["java_path"]
