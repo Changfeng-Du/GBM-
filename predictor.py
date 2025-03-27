@@ -104,21 +104,18 @@ if st.button("Predict"):
     # 计算SHAP值
     shap_values = explainer.shap_values(input_df)
     
-    # 调整SHAP值格式以匹配您提供的代码
-    shap_values_multi = np.stack([shap_values[0], shap_values[1]], axis=-1)  # 形状: (n_samples, n_features, 2)
-    
     # 显示SHAP force plot
     st.subheader("SHAP Force Plot Explanation")
     plt.figure()
     if predicted_class == 1:
         shap.force_plot(explainer.expected_value[1], 
-                       shap_values_multi[0,:,1],  # 取第一个样本的类别1 SHAP值
+                       shap_values[0,:,1],  # 取第一个样本的类别1 SHAP值
                        input_df.iloc[0],
                        matplotlib=True,
                        show=False)
     else:
         shap.force_plot(explainer.expected_value[0], 
-                       shap_values_multi[0,:,0],  # 取第一个样本的类别0 SHAP值
+                       shap_values[0,:,0],  # 取第一个样本的类别0 SHAP值
                        input_df.iloc[0],
                        matplotlib=True,
                        show=False)
