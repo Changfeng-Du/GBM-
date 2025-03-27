@@ -65,8 +65,8 @@ if st.button("Predict"):
     
     # Make prediction
     prediction = pmml_model.predict(input_df)
-    prob_0 = prediction['probability(0)'][0]
-    prob_1 = prediction['probability(1)'][0]
+    prob_0 = prediction['probability(1)'][0]
+    prob_1 = prediction['probability(0)'][0]
     
     # Determine predicted class
     predicted_class = 1 if prob_1 > 0.560066899148278 else 0
@@ -92,45 +92,20 @@ if st.button("Predict"):
     st.write(advice)
 
     # SHAP Explanation
-    st.subheader("SHAP Explanation")
-    # 2. 获取模型特征
-    model_features = pmml_model.inputNames
+     st.subheader("SHAP Force Plot Explanation")
+    explainer = shap.TreeExplainer(pmml_model)
 
-    # 3. 定义预测函数
-    def pmml_predict(data):
-        if isinstance(data, pd.DataFrame):
-            input_df = data[model_features].copy()
-        else:
-            input_df = pd.DataFrame(data, columns=model_features)
-    
-        predictions = pmml_model.predict(input_df)
-        return np.column_stack((
-            predictions['probability(0)'],
-            predictions['probability(1)']
-        ))
+    shap_values_class1 =explainer.shap_values(pd.DataFrame([feature_values], columns=feature_names))
+    base_values = [1 - explainer.expected_value, explainer.expected_value]  # [类别0, 类别1]
 
-    # 4. 准备数据（严格使用前100样本）
-    background = vad[model_features].iloc[:100]  # vad前100样本作为背景
-    dev_samples = dev[model_features].iloc[:100]  # dev前100样本计算SHAP值
-    
-    # 5. 创建解释器
-    explainer = shap.KernelExplainer(pmml_predict, background)
-    
-    # 6. 计算SHAP值（直接获得两个类别的SHAP值）
-    shap_values = explainer.shap_values(
-        dev_samples,
-        nsamples=100,
-        l1_reg="num_features(10)"
-    )
-    
-    # Display force plot
-    plt.figure()
+    # Display the SHAP force plot for the predicted clas
     if predicted_class == 1:
-        shap.force_plot(explainer.expected_value[1], shap_values[:,:,1], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
+        shap.force_plot(explainer.expected_value, shap_values_multi[:,:,1], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
     else:
-        shap.force_plot(explainer.expected_value[0], shap_values[:,:,0], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
-    st.pyplot(plt.gcf())
-    plt.clf()
+        shap.force_plot(1 -explainer.expected_value, shap_values_multi[:,:,0], pd.DataFrame([feature_values], columns=feature_names), matplotlib=True)
+
+    plt.savefig("shap_force_plot.png", bbox_inches='tight', dpi=1200)
+    st.image("shap_force_plot.png", caption='SHAP Force Plot Explanation')
 
     # LIME Explanation
     st.subheader("LIME Explanation")
