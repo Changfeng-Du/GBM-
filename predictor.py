@@ -126,7 +126,7 @@ if st.button("Predict"):
     # LIME Explanation
     st.subheader("LIME Explanation")
     lime_explainer = LimeTabularExplainer(
-        training_data=background.values,
+        training_data=dev.values,
         feature_names=feature_names,
         class_names=['Non-comorbidity', 'Comorbidity'],
         mode='classification'
