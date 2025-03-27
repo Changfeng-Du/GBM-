@@ -53,8 +53,8 @@ if st.button("Predict"):
     
     # Make prediction
     prediction = pmml_model.predict(input_df)
-    prob_0 = prediction['probability(0)'][0]
-    prob_1 = prediction['probability(1)'][0]
+    prob_0 = prediction['probability(1)'][0]
+    prob_1 = prediction['probability(0)'][0]
     
     # Determine predicted class
     predicted_class = 1 if prob_1 > 0.560066899148278 else 0
@@ -83,7 +83,7 @@ if st.button("Predict"):
     st.subheader("SHAP Explanation")
     
     # 准备背景数据（使用前100个样本）
-    background = vad[feature_names].iloc[:100]
+    background = vad[feature_names].iloc[:500]
     
     # 定义预测函数
     def pmml_predict(data):
