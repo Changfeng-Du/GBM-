@@ -138,5 +138,5 @@ if st.button("Predict"):
     )
     
     # Display LIME explanation
-    lime_html = lime_exp.as_html(show_table=False)  
+    lime_html = lime_exp.as_html(show_table=True)  
     st.components.v1.html(lime_html, height=800, scrolling=True)
