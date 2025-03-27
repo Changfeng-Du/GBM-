@@ -102,9 +102,9 @@ if st.button("Predict"):
     # Display force plot
     plt.figure()
     if predicted_class == 1:
-        shap.force_plot(explainer.expected_value[1], shap_values[1][0,:], input_df.iloc[0], matplotlib=True)
+        shap.force_plot(explainer.expected_value, shap_values[1][0,:], input_df.iloc[0], matplotlib=True)
     else:
-        shap.force_plot(explainer.expected_value[0], shap_values[0][0,:], input_df.iloc[0], matplotlib=True)
+        shap.force_plot(1-explainer.expected_value, shap_values[0][0,:], input_df.iloc[0], matplotlib=True)
     st.pyplot(plt.gcf())
     plt.clf()
 
